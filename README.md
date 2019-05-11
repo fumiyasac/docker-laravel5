@@ -7,6 +7,12 @@ PHP7.3/MySQL8.0/nginx/composer/redis/node
 
 ## Usage
 
+### Git settings(Windows Only...😇)
+
+```
+$ git config --global core.autocrlf false
+```
+
 ### Git clone
 
 ```
@@ -21,22 +27,54 @@ $ docker-compose build
 $ docker-compose up -d
 ```
 
-### Laravel new project install
+### Install Laravel 5 using Composer
 
 ```
-$ docker-compose exec app ash
-$ composer create-project --prefer-dist laravel/laravel .
+$ docker-compose exec app composer create-project --prefer-dist "laravel/laravel=5.8.*" .
 ```
 
 http://127.0.0.1:3500
 
-### Laravel migration execute
+### Running Migrations
 
 ```
+$ docker-compose exec app ash
+$ sed -i -e "s/DB_HOST=.*/DB_HOST=db/" .env
 $ php artisan migrate
 ```
 
+### Running Testings
+
+```
+$ docker-compose exec app ash
+$ cp .env.example .env.testing
+$ php artisan key:generate --env testing
+$ sed -i -e "s/DB_HOST=.*/DB_HOST=db-testing/" .env.testing
+$ ./vendor/bin/phpunit
+```
+
+### Send Test Mail
+
+```
+$ docker-compose exec app ash
+$ sed -i -e "s/MAIL_HOST=.*/MAIL_HOST=mail/" .env
+$ sed -i -e "s/MAIL_PORT=.*/MAIL_PORT=1025/" .env
+
+$ php artisan tinker
+Mail::raw('test mail',function($message){$message->to('test@example.com')->subject('test');});
+```
+
+http://127.0.0.1:3504
+
 ## As necessary
+
+### Login shell of the app container
+
+```
+$ docker-compose exec app ash -l
+```
+
+[alias settings](docker/php/aliases.sh) is enabled by `-l` option.
 
 ### MySQL connection
 
@@ -58,8 +96,13 @@ $ npm run dev # OR yarn run dev
 ```
 $ docker-compose exec app ash
 $ composer require predis/predis
+$ sed -i -e 's/REDIS_HOST=.*/REDIS_HOST=redis/' .env
 $ sed -i -e 's/CACHE_DRIVER=.*/CACHE_DRIVER=redis/' .env
 $ sed -i -e 's/SESSION_DRIVER=.*/SESSION_DRIVER=redis/' .env
+
+$ php artisan tinker
+Redis::set('name', 'hoge');
+Redis::get('name');
 ```
 
 ### Redis cli
@@ -67,4 +110,13 @@ $ sed -i -e 's/SESSION_DRIVER=.*/SESSION_DRIVER=redis/' .env
 ```
 $ docker-compose exec redis ash
 $ redis-cli
+```
+
+### Clear database volume
+
+```
+$ docker volume ls
+local               ${COMPOSE_PROJECT_NAME}_db-data
+
+$ docker volume rm ${COMPOSE_PROJECT_NAME}_db-data
 ```
