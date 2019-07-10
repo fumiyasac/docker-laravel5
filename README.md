@@ -23,14 +23,13 @@ $ cd docker-laravel5
 ### Docker compose build & up
 
 ```
-$ docker-compose build
 $ docker-compose up -d
 ```
 
 ### Install Laravel 5 using Composer
 
 ```
-$ docker-compose exec app composer create-project --prefer-dist "laravel/laravel=5.8.*" .
+$ docker-compose run composer create-project --prefer-dist "laravel/laravel=5.8.*" .
 ```
 
 http://127.0.0.1:3500
@@ -38,7 +37,7 @@ http://127.0.0.1:3500
 ### Running Migrations
 
 ```
-$ docker-compose exec app ash
+$ docker-compose exec app ash -l
 $ sed -i -e "s/DB_HOST=.*/DB_HOST=db/" .env
 $ php artisan migrate
 ```
@@ -46,7 +45,7 @@ $ php artisan migrate
 ### Running Testings
 
 ```
-$ docker-compose exec app ash
+$ docker-compose exec app ash -l
 $ cp .env.example .env.testing
 $ php artisan key:generate --env testing
 $ sed -i -e "s/DB_HOST=.*/DB_HOST=db-testing/" .env.testing
@@ -56,7 +55,7 @@ $ ./vendor/bin/phpunit
 ### Send Test Mail
 
 ```
-$ docker-compose exec app ash
+$ docker-compose exec app ash -l
 $ sed -i -e "s/MAIL_HOST=.*/MAIL_HOST=mail/" .env
 $ sed -i -e "s/MAIL_PORT=.*/MAIL_PORT=1025/" .env
 
@@ -68,13 +67,11 @@ http://127.0.0.1:3504
 
 ## As necessary
 
-### Login shell of the app container
+### Composer dump autoload
 
 ```
-$ docker-compose exec app ash -l
+$ docker-compose run composer dump-autoload
 ```
-
-[alias settings](docker/php/aliases.sh) is enabled by `-l` option.
 
 ### MySQL connection
 
@@ -83,18 +80,24 @@ $ docker-compose exec db bash
 $ mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}
 ```
 
-### Node(npm, yarn)
+### Node(npm)
 
 ```
-$ docker-compose run node ash
-$ npm install # OR yarn install
-$ npm run dev # OR yarn run dev
+$ docker-compose run node npm install
+$ docker-compose run node npm run dev
+```
+
+### Node(yarn)
+
+```
+$ docker-compose run node yarn install
+$ docker-compose run node yarn run dev
 ```
 
 ### Redis for Laravel
 
 ```
-$ docker-compose exec app ash
+$ docker-compose exec app ash -l
 $ composer require predis/predis
 $ sed -i -e 's/REDIS_HOST=.*/REDIS_HOST=redis/' .env
 $ sed -i -e 's/CACHE_DRIVER=.*/CACHE_DRIVER=redis/' .env
@@ -108,7 +111,7 @@ Redis::get('name');
 ### Redis cli
 
 ```
-$ docker-compose exec redis ash
+$ docker-compose exec redis ash -l
 $ redis-cli
 ```
 
